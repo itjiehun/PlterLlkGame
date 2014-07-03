@@ -78,8 +78,8 @@ public class Config {
 	}
 
 	private static void computeCardWidthAndHeight() {
-		float cardWidth = Config.getGameCardsAreaWidth() / Level.MAX_H_CARDS_COUNT;
-		float cardHeight = Config.getGameCardsAreaHeight() / Level.MAX_V_CARDS_COUNT;
+		float cardWidth = Config.getGameCardsAreaWidth() / GameLevel.MAX_H_CARDS_COUNT;
+		float cardHeight = Config.getGameCardsAreaHeight() / GameLevel.MAX_V_CARDS_COUNT;
 		float min = Math.min(cardWidth, cardHeight);
 		Config.setCardWidth(min);
 		Config.setCardHeight(min);

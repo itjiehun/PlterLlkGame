@@ -154,7 +154,7 @@ public class GameUtil {
 	 */
 	public static boolean testCards3H(int i1, int j1, int i2, int j2, boolean genLines) {
 		int i = 0;
-		for (i = i1 + 1; i < currentLevel.getH_cards_count(); i++) {
+		for (i = i1 + 1; i < currentLevel.hCardCount; i++) {
 			if (i != i2 && currentGameCardsMap[i][j1] == null) {
 				if (testCards1(i, j1, i1, j1, false) && testCards2(i, j1, i2, j2, false)) {
 					if (genLines) {
@@ -169,7 +169,7 @@ public class GameUtil {
 				}
 			}
 		}
-		i = currentLevel.getH_cards_count();
+		i = currentLevel.hCardCount;
 		if (testCards1(i, j1, i1, j1, false) && testCards1(i, j2, i2, j2, false)) {
 			if (genLines) {
 				lastLinkedLinePoints.clear();
@@ -222,7 +222,7 @@ public class GameUtil {
 	 */
 	public static boolean testCards3V(int i1, int j1, int i2, int j2, boolean genLines) {
 		int j = 0;
-		for (j = j1 + 1; j < currentLevel.getV_cards_count(); j++) {
+		for (j = j1 + 1; j < currentLevel.vCardCount; j++) {
 			if (j != j2 && currentGameCardsMap[i1][j] == null) {
 				if (testCards1(i1, j, i1, j1, false) && testCards2(i1, j, i2, j2, false)) {
 					if (genLines) {
@@ -236,7 +236,7 @@ public class GameUtil {
 				}
 			}
 		}
-		j = currentLevel.getV_cards_count();
+		j = currentLevel.vCardCount;
 		if (testCards1(i1, j, i1, j1, false) && testCards1(i2, j, i2, j2, false)) {
 
 			if (genLines) {
@@ -307,7 +307,7 @@ public class GameUtil {
 		return false;
 	}
 
-	public static boolean testCards(Level currentLevel, Card[][] currentGameCardsMap, int i1, int j1, int i2, int j2,
+	public static boolean testCards(GameLevel currentLevel, Card[][] currentGameCardsMap, int i1, int j1, int i2, int j2,
 			boolean genLines) {
 		GameUtil.currentLevel = currentLevel;
 		GameUtil.currentGameCardsMap = currentGameCardsMap;
@@ -338,7 +338,7 @@ public class GameUtil {
 	 *            长度为2的Card数组，用于存放连通的卡片
 	 * @return
 	 */
-	public static boolean isGameConnected(Level currentLevel, List<Card> currentGameCards,
+	public static boolean isGameConnected(GameLevel currentLevel, List<Card> currentGameCards,
 			Card[][] currentGameCardsMap, Card[] connectedCards) {
 
 		Card card1, card2;
@@ -369,6 +369,6 @@ public class GameUtil {
 
 	public static final List<PointF> lastLinkedLinePoints = new ArrayList<PointF>();
 
-	private static Level currentLevel = null;
+	private static GameLevel currentLevel = null;
 	private static Card[][] currentGameCardsMap = null;
 }

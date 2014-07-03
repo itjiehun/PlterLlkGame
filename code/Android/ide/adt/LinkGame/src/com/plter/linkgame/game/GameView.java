@@ -35,16 +35,12 @@ public class GameView extends FrameLayout {
 	 * @param gamePkg
 	 */
 	public void initWithGamePkg(GamePkg gamePkg) {
-
 		setGamePkg(gamePkg);
-
 		// 设置背景
 		setBackgroundDrawable(new BitmapDrawable(getGamePkg().getBackground().getBitmap()));
-
 		// 构建卡片容器
 		cardsContainer = new RelativeLayout(getContext());
 		addView(cardsContainer, -1, -1);
-
 		// 构建连线容器
 		linesContainer = new LinesContainer(getContext());
 		addView(linesContainer, -1, -1);
@@ -73,18 +69,13 @@ public class GameView extends FrameLayout {
 	 * 开始游戏
 	 */
 	public void startGame() {
-		level = Level.LEVELS[levelNum];
-		currentTime = level.getMaxTime();
-
+		level = GameLevel.level(levelNum + 1);// .LEVELS[levelNum];
+		currentTime = level.maxTime;
 		getLevelTv().setText(String.format("第%d关，", levelNum + 1));
-
 		genGameCards();
 		addGameCards();
-
 		startGameTimerHandler();
-
 		gameRunning = true;
-
 		setEnabled(true);
 	}
 
@@ -92,28 +83,23 @@ public class GameView extends FrameLayout {
 	 * 打乱卡片
 	 */
 	public void breakGameCards() {
-		gameCardsMap = new Card[level.getH_cards_count()][level.getV_cards_count()];
-
+		gameCardsMap = new Card[level.hCardCount][level.vCardCount];
 		allIndex.clear();
-		for (int i = 0; i < level.getH_cards_count(); i++) {
-			for (int j = 0; j < level.getV_cards_count(); j++) {
+		for (int i = 0; i < level.hCardCount; i++) {
+			for (int j = 0; j < level.vCardCount; j++) {
 				allIndex.add(new Point(i, j));
 			}
 		}
-
 		Card card = null;
 		Point point = null;
-
 		for (int i = 0; i < gameCards.size(); i++) {
 			card = gameCards.get(i);
 			point = allIndex.remove((int) (Math.random() * allIndex.size()));
-
 			card.setIndexI(point.x);
 			card.setIndexJ(point.y);
 			card.resetPositionByIndexIJ();
 			gameCardsMap[point.x][point.y] = card;
 		}
-
 		if (!GameUtil.isGameConnected(level, gameCards, gameCardsMap, null)) {
 			breakGameCards();
 		}
@@ -135,15 +121,15 @@ public class GameView extends FrameLayout {
 		int index = 0;
 
 		Config.setCardsOffsetX(Config.GAME_CARDS_AREA_LEFT
-				+ (Config.getGameCardsAreaWidth() - Config.getCardWidth() * level.getH_cards_count()) / 2);
+				+ (Config.getGameCardsAreaWidth() - Config.getCardWidth() * level.hCardCount) / 2);
 		Config.setCardsOffsetY(Config.GAME_CARDS_AREA_TOP
-				+ (Config.getGameCardsAreaHeight() - Config.getCardHeight() * level.getV_cards_count()) / 2);
+				+ (Config.getGameCardsAreaHeight() - Config.getCardHeight() * level.vCardCount) / 2);
 
-		gameCardsMap = new Card[level.getH_cards_count()][level.getV_cards_count()];
+		gameCardsMap = new Card[level.hCardCount][level.vCardCount];
 
-		for (int i = 0; i < level.getH_cards_count(); i++) {
-			for (int j = 0; j < level.getV_cards_count(); j++) {
-				index = j + i * level.getV_cards_count();
+		for (int i = 0; i < level.hCardCount; i++) {
+			for (int j = 0; j < level.vCardCount; j++) {
+				index = j + i * level.vCardCount;
 				card = gameCards.get(index);
 				cardsContainer.addView(card, (int) (Config.getCardWidth()), (int) (Config.getCardHeight()));
 
@@ -153,7 +139,6 @@ public class GameView extends FrameLayout {
 				gameCardsMap[i][j] = card;
 			}
 		}
-
 		if (!GameUtil.isGameConnected(level, gameCards, gameCardsMap, null)) {
 			breakGameCards();
 		}
@@ -163,17 +148,13 @@ public class GameView extends FrameLayout {
 	 * 生成游戏卡片
 	 */
 	public void genGameCards() {
-
 		cardsContainer.removeAllViews();
 		gameCards.clear();
-
-		int halfCardsCount = level.getH_cards_count() * level.getV_cards_count() / 2;
+		int halfCardsCount = level.hCardCount * level.vCardCount / 2;
 		Picture pic = null;
 		Card card;
-
 		for (int i = 0; i < halfCardsCount; i++) {
 			pic = getGamePkg().getPictures()[(int) (Math.random() * getGamePkg().getPictures().length)];
-
 			card = new Card(getContext(), pic);
 			card.setOnClickListener(cardClickHandler);
 			gameCards.add(card);
@@ -184,11 +165,9 @@ public class GameView extends FrameLayout {
 	}
 
 	private final OnClickListener cardClickHandler = new OnClickListener() {
-
 		public void onClick(View v) {
 			currentCheckedCard = (Card) v;
 			currentCheckedCard.setChecked(true);
-
 			if (lastCheckedCard != null) {
 				if (lastCheckedCard != currentCheckedCard) {
 					if (testCards()) {
@@ -196,15 +175,11 @@ public class GameView extends FrameLayout {
 						gameCardsMap[lastCheckedCard.getIndexI()][lastCheckedCard.getIndexJ()] = null;
 						cardsContainer.removeView(currentCheckedCard);
 						cardsContainer.removeView(lastCheckedCard);
-
 						gameCards.remove(currentCheckedCard);
 						gameCards.remove(lastCheckedCard);
-
 						currentCheckedCard.setOnClickListener(null);
 						lastCheckedCard.setOnClickListener(null);
-
 						linesContainer.showLines(GameUtil.lastLinkedLinePoints);
-
 						if (gameCards.size() > 0) {
 							if (!GameUtil.isGameConnected(level, gameCards, gameCardsMap, null)) {
 								breakGameCards();
@@ -215,11 +190,8 @@ public class GameView extends FrameLayout {
 							if (gameRunning) {
 								stopGameTimerHandler();
 								gameRunning = false;
-
-								if (levelNum < Level.LEVELS.length - 1) {
-
+								if (levelNum < GameLevel.values().length - 1) {
 									setEnabled(false);
-
 									new AlertDialog.Builder(getContext()).setTitle("恭喜")
 											.setMessage(String.format("游戏将进入第%d关", levelNum + 2)).setCancelable(false)
 											.setPositiveButton("继续", new DialogInterface.OnClickListener() {
@@ -229,19 +201,15 @@ public class GameView extends FrameLayout {
 													startGame();
 												}
 											}).show();
-
 								} else {
-
 									setEnabled(false);
 									new AlertDialog.Builder(getContext()).setTitle("恭喜").setMessage("你真厉害，已经通关了")
 											.setCancelable(false)
 											.setNegativeButton("退出", new DialogInterface.OnClickListener() {
-
 												public void onClick(DialogInterface dialog, int which) {
 													System.exit(0);
 												}
 											}).setPositiveButton("重新再来", new DialogInterface.OnClickListener() {
-
 												public void onClick(DialogInterface dialog, int which) {
 													reset();
 													startGame();
@@ -257,10 +225,8 @@ public class GameView extends FrameLayout {
 				} else {
 					lastCheckedCard.setChecked(false);
 				}
-
 				lastCheckedCard = null;
 				currentCheckedCard = null;
-
 			} else {
 				lastCheckedCard = currentCheckedCard;
 			}
@@ -274,10 +240,8 @@ public class GameView extends FrameLayout {
 	 */
 	private boolean testCards() {
 		if (lastCheckedCard.getPicture().getId() == currentCheckedCard.getPicture().getId()) {
-
 			int i1 = lastCheckedCard.getIndexI(), j1 = lastCheckedCard.getIndexJ(), i2 = currentCheckedCard.getIndexI(), j2 = currentCheckedCard
 					.getIndexJ();
-
 			if (GameUtil.testCards(level, gameCardsMap, i1, j1, i2, j2, true)) {
 				return true;
 			}
@@ -294,7 +258,7 @@ public class GameView extends FrameLayout {
 		return levelNum;
 	}
 
-	public Level getLevel() {
+	public GameLevel getLevel() {
 		return level;
 	}
 
@@ -304,10 +268,8 @@ public class GameView extends FrameLayout {
 	public void pauseGame() {
 		gameRunning = false;
 		pause();
-
 		new AlertDialog.Builder(getContext()).setCancelable(false).setTitle("暂停中").setMessage("游戏暂停中，请点击“继续”按钮继续游戏")
 				.setPositiveButton("继续", new DialogInterface.OnClickListener() {
-
 					public void onClick(DialogInterface dialog, int which) {
 						gameRunning = true;
 						resume();
@@ -477,7 +439,7 @@ public class GameView extends FrameLayout {
 	 * 关卡数
 	 */
 	private int levelNum = 1;
-	private Level level = null;
+	private GameLevel level = null;
 	private int currentTime = 0;
 
 	/**
